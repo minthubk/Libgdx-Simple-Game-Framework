@@ -1,17 +1,18 @@
-package com.autlos.sgf;
+package com.autlos.sgf.models;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * @author Autlos
  * 
  */
 public abstract class Entity {
-	// TODO: fix the parameters order in the constructors.
 	// The frame is going to be drawn:
 	protected TextureRegion currentFrame;
 
@@ -19,6 +20,7 @@ public abstract class Entity {
 	protected float width;
 	protected float height;
 	protected Vector2 origin;
+	protected Vector2 originCoordinates;
 	protected Vector2 position;
 	protected float rotation;
 	protected Rectangle bounds;
@@ -36,7 +38,7 @@ public abstract class Entity {
 	int FRAME_ROWS = 1;
 	int FRAME_COLS = 1;
 	protected Animation animation;
-	protected float stateTime;
+	protected float stateTime = 0f;
 
 	/************ CONSTRUCTORS ************/
 
@@ -63,46 +65,42 @@ public abstract class Entity {
 	public Entity(TextureRegion textureRegion, Vector2 position, float rotation, float scaleX, float scaleY) {
 		this.position = position;
 		this.rotation = rotation;
-		this.scaleX = scaleX;
-		this.scaleY = scaleY;
-		setInitialFrame(textureRegion);
-		setDimensions();
+		currentFrame = textureRegion;
+		setScale(scaleX, scaleY);
 	}
 
 	/**
 	 * Creates an Entity with multiple frames but not animated. Scale will be 1f.
 	 * 
 	 * @param textureRegion
-	 * @param position
-	 * @param rotation
 	 * @param FRAME_ROWS
 	 * @param FRAME_COLS
+	 * @param position
+	 * @param rotation
 	 */
-	public Entity(TextureRegion textureRegion, Vector2 position, float rotation, int FRAME_ROWS, int FRAME_COLS) {
-		this(textureRegion, position, rotation, 1f, 1f, FRAME_ROWS, FRAME_COLS);
+	public Entity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, Vector2 position, float rotation) {
+		this(textureRegion, FRAME_ROWS, FRAME_COLS, position, rotation, 1f, 1f);
 	}
 
 	/**
 	 * Creates an Entity with multiple frames but not animated.
 	 * 
 	 * @param textureRegion
+	 * @param FRAME_ROWS
+	 * @param FRAME_COLS
 	 * @param position
 	 * @param rotation
 	 * @param scaleX
 	 * @param scaleY
-	 * @param FRAME_ROWS
-	 * @param FRAME_COLS
 	 */
-	public Entity(TextureRegion textureRegion, Vector2 position, float rotation, float scaleX, float scaleY,
-	      int FRAME_ROWS, int FRAME_COLS) {
+	public Entity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, Vector2 position, float rotation,
+	      float scaleX, float scaleY) {
 		createFrames(textureRegion, FRAME_ROWS, FRAME_COLS);
 		this.position = position;
 		this.rotation = rotation;
-		this.scaleX = scaleX;
-		this.scaleY = scaleY;
 
-		setInitialFrame(frames[0]);
-		setDimensions();
+		currentFrame = frames[0];
+		setScale(scaleX, scaleY);
 		stateTime = 0f;
 	}
 
@@ -110,41 +108,41 @@ public abstract class Entity {
 	 * Creates an Animated entity. Scale will be 1f.
 	 * 
 	 * @param textureRegion
-	 * @param position
-	 * @param rotation
 	 * @param FRAME_ROWS
 	 *           of the textureRegion
 	 * @param FRAME_COLS
 	 *           of the textureRegion
+	 * @param position
+	 * @param rotation
 	 * @param frameDuration
 	 *           time, in seconds, for each frame in the animation
 	 * @param playMode
 	 *           for example Animation.LOOP {@link Animation}
 	 */
-	public Entity(TextureRegion textureRegion, Vector2 position, float rotation, int FRAME_ROWS, int FRAME_COLS,
+	public Entity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, Vector2 position, float rotation,
 	      float frameDuration, int playMode) {
-		this(textureRegion, position, rotation, 1f, 1f, FRAME_ROWS, FRAME_COLS, frameDuration, playMode);
+		this(textureRegion, FRAME_ROWS, FRAME_COLS, position, rotation, 1f, 1f, frameDuration, playMode);
 	}
 
 	/**
 	 * Creates an Animated entity
 	 * 
 	 * @param textureRegion
-	 * @param position
-	 * @param rotation
-	 * @param scaleX
-	 * @param scaleY
 	 * @param FRAME_ROWS
 	 *           of the textureRegion
 	 * @param FRAME_COLS
 	 *           of the textureRegion
+	 * @param position
+	 * @param rotation
+	 * @param scaleX
+	 * @param scaleY
 	 * @param frameDuration
 	 *           time, in seconds, for each frame in the animation
 	 * @param playMode
 	 *           for example Animation.LOOP {@link Animation}
 	 */
-	public Entity(TextureRegion textureRegion, Vector2 position, float rotation, float scaleX, float scaleY,
-	      int FRAME_ROWS, int FRAME_COLS, float frameDuration, int playMode) {
+	public Entity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, Vector2 position, float rotation,
+	      float scaleX, float scaleY, float frameDuration, int playMode) {
 
 		createFrames(textureRegion, FRAME_ROWS, FRAME_COLS);
 		this.animation = new Animation(frameDuration, frames);
@@ -152,12 +150,9 @@ public abstract class Entity {
 
 		this.position = position;
 		this.rotation = rotation;
-		this.scaleX = scaleX;
-		this.scaleY = scaleY;
 
-		setInitialFrame(animation.getKeyFrame(0f));
-		setDimensions();
-		stateTime = 0f;
+		currentFrame = animation.getKeyFrame(0f);
+		setScale(scaleX, scaleY);
 	}
 
 	/**
@@ -168,23 +163,17 @@ public abstract class Entity {
 	 * @param FRAME_COLS
 	 */
 	protected void createFrames(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS) {
-		int tileWidth = textureRegion.getRegionWidth() / FRAME_COLS;
+		int frameWdith = textureRegion.getRegionWidth() / FRAME_COLS;
 		frames = new TextureRegion[FRAME_ROWS * FRAME_COLS];
 		int cont = 0;
+
 		for (int j = 0; j < FRAME_ROWS; j++) {
 			for (int i = 0; i < FRAME_COLS; i++) {
-				frames[cont] = new TextureRegion(textureRegion, i * tileWidth, j * textureRegion.getRegionHeight()
-				      / FRAME_ROWS, tileWidth, textureRegion.getRegionHeight() / FRAME_ROWS);
+				frames[cont] = new TextureRegion(textureRegion, i * frameWdith, j * textureRegion.getRegionHeight()
+				      / FRAME_ROWS, frameWdith, textureRegion.getRegionHeight() / FRAME_ROWS);
 				cont++;
 			}
 		}
-	}
-
-	/**
-	 * Sets the initial frame. If the textureRegion isn't multiframe/animated, the currentFrame will be the texture region.
-	 */
-	protected void setInitialFrame(TextureRegion frame) {
-		currentFrame = frame;
 	}
 
 	/**
@@ -216,7 +205,11 @@ public abstract class Entity {
 	protected void setDimensions(float width, float height) {
 		this.width = width * scaleX;
 		this.height = height * scaleY;
-		this.origin = new Vector2(this.width / 2, this.height / 2);
+		if (origin == null) {
+			origin = new Vector2(this.width / 2, this.height / 2);
+		} else {
+			this.origin.set(this.width / 2, this.height / 2);
+		}
 	}
 
 	/**
@@ -235,8 +228,12 @@ public abstract class Entity {
 	public void createBounds(float minX, float minY) {
 		this.minBoundsX = minX * scaleX;
 		this.minBoundsY = minY * scaleY;
-		this.bounds = new Rectangle(position.x + minBoundsX, position.y + minBoundsY, width - 2 * minBoundsX, height - 2
-		      * minBoundsY);
+		if (bounds == null) {
+			bounds = new Rectangle(position.x + minBoundsX, position.y + minBoundsY, width - 2 * minBoundsX, height - 2
+			      * minBoundsY);
+		} else {
+			bounds.set(position.x + minBoundsX, position.y + minBoundsY, width - 2 * minBoundsX, height - 2 * minBoundsY);
+		}
 	}
 
 	/**
@@ -262,6 +259,40 @@ public abstract class Entity {
 	}
 
 	/**
+	 * Return true if the entity is overlaping one of the elements of the Array.
+	 * 
+	 * @param entities
+	 * @return
+	 */
+	public boolean overlaps(Array<Entity> entities) {
+		for (Entity e : entities) {
+			if (overlaps(e)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * If the bounds are colliding with the arg entity's bounds.
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	public boolean overlaps(Entity entity) {
+		return this.bounds.overlaps(entity.bounds);
+	}
+
+	/**
+	 * Draws the bound's shape. {@code shapeRenderer.begin()} and color have to be set before calling this method.
+	 * 
+	 * @param sr
+	 */
+	public void drawShape(ShapeRenderer sr) {
+		sr.rect(bounds.x, bounds.y, bounds.width, bounds.height);
+	}
+
+	/**
 	 * @return the entity's position
 	 */
 	public Vector2 getPosition() {
@@ -273,7 +304,11 @@ public abstract class Entity {
 	 *           the {@code Vector2} to be set
 	 */
 	public void setPosition(Vector2 position) {
-		this.position = position;
+		if (this.position == null) {
+			this.position = new Vector2(position);
+		} else {
+			this.position.set(position);
+		}
 	}
 
 	/**
@@ -281,8 +316,11 @@ public abstract class Entity {
 	 * @param y
 	 */
 	public void setPosition(float x, float y) {
-		this.position.x = x;
-		this.position.y = y;
+		if (this.position == null) {
+			this.position = new Vector2(x, y);
+		} else {
+			this.position.set(x, y);
+		}
 	}
 
 	/**
@@ -291,7 +329,12 @@ public abstract class Entity {
 	 * @return {@code Vector2}
 	 */
 	public Vector2 getOriginCoordinates() {
-		return new Vector2(position.x + origin.x, position.y + origin.y);
+		if(originCoordinates == null){
+		  originCoordinates = new Vector2(position.x + origin.x, position.y + origin.y);
+		}else{
+			originCoordinates.set(position.x + origin.x, position.y + origin.y);
+		}
+		return originCoordinates;
 	}
 
 	/**
@@ -319,11 +362,11 @@ public abstract class Entity {
 	}
 
 	/**
-	 * Sets the width for the entity. If it is scalable, {@code this.width = width*scaleX}, if not, {@code this.width = width}. Then, it recalculates
-	 * the origin.
+	 * Sets the width for the entity. If it is scalable, {@code this.width = width*scaleX}, if not, {@code this.width = width}.
 	 * 
 	 * @param width
 	 * @param scalable
+	 *           if true scaleX will be applied to the new width or .
 	 */
 	public void setWidth(float width, boolean scalable) {
 		if (scalable) {
@@ -341,10 +384,17 @@ public abstract class Entity {
 		return width;
 	}
 
+	/**
+	 * Sets the height for the entity. If it is scalable, {@code this.width = width*scaleX}, if not, {@code this.width = width}.
+	 * 
+	 * @param height
+	 * @param scalable
+	 *           if true scaleY will be applied to the new width or not.
+	 */
 	public void setHeight(float height, boolean scalable) {
-		if(scalable){
-			this.height = height * scaleY;			
-		}else{
+		if (scalable) {
+			this.height = height * scaleY;
+		} else {
 			this.height = height;
 		}
 		origin.y = this.height / 2;

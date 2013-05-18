@@ -11,9 +11,10 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class GuiTextElement extends GuiElement {
 	/**
-	 * enum with states CENTER, TOP, LEFT, RIGHT and BOTTOM 
+	 * enum with states CENTER, TOP, LEFT, RIGHT and BOTTOM
+	 * 
 	 * @author Autlos
-	 *
+	 * 
 	 */
 	public static enum TEXT_ALIGNMENT {
 		CENTER, TOP, LEFT, RIGHT, BOTTOM
@@ -24,7 +25,7 @@ public class GuiTextElement extends GuiElement {
 	private BasicLabel label;
 
 	/********** CONSTRUCTORS **********/
-	
+
 	/**
 	 * Creates a GuiTextElement in the specified position.
 	 * 
@@ -37,7 +38,7 @@ public class GuiTextElement extends GuiElement {
 		// Constructor for a basic Gui Element:
 		this(textureRegion, position, font, text, 1f, 1f);
 	}
-	
+
 	/**
 	 * Creates a GuiTextElement without position. Position has to be set later.
 	 * 
@@ -49,7 +50,7 @@ public class GuiTextElement extends GuiElement {
 		// Constructor for a basic Entity:
 		this(textureRegion, new Vector2(), font, text);
 	}
-	
+
 	/**
 	 * Creates a GuiText element with multiple frames. Position has to be set later.
 	 * 
@@ -63,7 +64,6 @@ public class GuiTextElement extends GuiElement {
 		this(textureRegion, font, new Vector2(), text, FRAME_ROWS, FRAME_COLS);
 	}
 
-	
 	/**
 	 * Creates a GuiTextElement in the specified position.
 	 * 
@@ -115,49 +115,52 @@ public class GuiTextElement extends GuiElement {
 		label = new BasicLabel(font, text, value);
 		alignText(TEXT_ALIGNMENT.CENTER);
 	}
-	
+
 	/********** METHODS **********/
-	
+
 	/**
 	 * Draws the GuiElement and the label.
 	 */
 	public void draw(SpriteBatch batch) {
 		super.draw(batch);
-		label.draw(batch);
+		if (visible) {
+			label.draw(batch);
+		}
 	}
-	
+
 	/**
 	 * Aligns the text relative to the center of the GuiElement
 	 * 
 	 * @param align
 	 */
 	public void alignText(TEXT_ALIGNMENT align) {
-		Vector2 posLabel = new Vector2();
+		float x = 0f;
+		float y = 0f;
 		this.align = align;
 		switch (align) {
 		case CENTER:
-			posLabel.x = this.getOriginCoordinates().x - label.getWidth() / 2;
-			posLabel.y = this.getOriginCoordinates().y + label.getHeight() / 2;
+			x = this.getOriginCoordinates().x - label.getWidth() / 2;
+			y = this.getOriginCoordinates().y + label.getHeight() / 2;
 			break;
 		case LEFT:
-			posLabel.x = this.getPosition().x;
-			posLabel.y = this.getOriginCoordinates().y + label.getHeight() / 2;
+			x = this.getPosition().x;
+			y = this.getOriginCoordinates().y + label.getHeight() / 2;
 			break;
 		case RIGHT:
-			posLabel.x = getPosition().x + this.getWidth() - label.getWidth();
-			posLabel.y = this.getOriginCoordinates().y + label.getHeight() / 2;
+			x = getPosition().x + this.getWidth() - label.getWidth();
+			y = this.getOriginCoordinates().y + label.getHeight() / 2;
 			break;
 		case TOP:
-			posLabel.x = this.getOriginCoordinates().x - label.getWidth() / 2;
-			posLabel.y = this.getPosition().y + getHeight();
+			x = this.getOriginCoordinates().x - label.getWidth() / 2;
+			y = this.getPosition().y + getHeight();
 			break;
 		case BOTTOM:
-			posLabel.x = this.getOriginCoordinates().x - label.getWidth() / 2;
-			posLabel.y = this.getPosition().y + label.getHeight();
-			break;
+			x = this.getOriginCoordinates().x - label.getWidth() / 2;
+			y = this.getPosition().y + label.getHeight();
+			break;				
 		}
 
-		label.setPosition(posLabel);
+		label.setPosition(x, y);
 	}
 
 	/**
@@ -193,6 +196,10 @@ public class GuiTextElement extends GuiElement {
 		alignText(TEXT_ALIGNMENT.CENTER);
 	}
 
+	public void setPosition(float x, float y){
+		super.setPosition(x, y);
+		alignText(TEXT_ALIGNMENT.CENTER);
+	}
 	public BasicLabel getLabel() {
 		return label;
 	}

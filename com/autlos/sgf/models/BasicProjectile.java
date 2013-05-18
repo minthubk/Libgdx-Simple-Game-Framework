@@ -1,4 +1,4 @@
-package com.autlos.sgf;
+package com.autlos.sgf.models;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -24,8 +24,7 @@ public class BasicProjectile extends MoveableEntity {
 	 */
 	public BasicProjectile(TextureRegion textureRegion, Vector2 position, float SPEED, float rotation) {
 		super(textureRegion, position, SPEED, rotation);
-		velocity = 1f;
-		createBounds(0f, 0f);
+		velocity = new Vector2(1f, 1f);
 	}
 
 	/**
@@ -46,8 +45,7 @@ public class BasicProjectile extends MoveableEntity {
 	public BasicProjectile(TextureRegion textureRegion, int FRAME_COLS, int FRAME_ROWS, float frameDuration,
 	      int playMode, Vector2 position, float SPEED, float rotation) {
 		super(textureRegion, FRAME_ROWS, FRAME_COLS, frameDuration, playMode, position, SPEED, rotation);
-		velocity = 1f;
-		createBounds(0f, 0f);
+		velocity = new Vector2(1f, 1f);
 	}
 
 	/**
@@ -83,8 +81,8 @@ public class BasicProjectile extends MoveableEntity {
 	 * @param delta
 	 */
 	private void move(float delta) {
-		this.position.x += SPEED * velocity * delta * MathUtils.cosDeg(rotation);
-		this.position.y += SPEED * velocity * delta * MathUtils.sinDeg(rotation);
+		this.position.x += SPEED * velocity.x * delta * MathUtils.cosDeg(rotation);
+		this.position.y += SPEED * velocity.y * delta * MathUtils.sinDeg(rotation);
 	}
 
 	public boolean isFinished() {

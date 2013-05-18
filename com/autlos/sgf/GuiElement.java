@@ -1,5 +1,7 @@
 package com.autlos.sgf;
 
+import com.autlos.sgf.models.Entity;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -12,8 +14,9 @@ import com.badlogic.gdx.math.Vector2;
 public class GuiElement extends Entity {
 	/**
 	 * enum to with the states NOT_PRESSED and PRESSED
+	 * 
 	 * @author Autlos
-	 *
+	 * 
 	 */
 	public static enum State {
 		NOT_PRESSED, PRESSED
@@ -21,8 +24,9 @@ public class GuiElement extends Entity {
 
 	/**
 	 * enum to with the states LEFT, RIGHT, UP and DOWN
+	 * 
 	 * @author Autlos
-	 *
+	 * 
 	 */
 	public static enum TouchDirection {
 		LEFT, RIGHT, UP, DOWN
@@ -30,11 +34,15 @@ public class GuiElement extends Entity {
 
 	protected State state;
 	protected TouchDirection touchDirection;
-	protected boolean actionable;
+	protected boolean multiFrame;
 	protected float touchAngle;
+	protected Rectangle touchRecgantle;
 
 	// The finger which touched the element
 	protected int pointer;
+
+	// If the element is visible or not:
+	protected boolean visible;
 
 	/**
 	 * Creates a GuiElement with a textureRegion to be drawn at a position. i.e the HUD background
@@ -59,9 +67,8 @@ public class GuiElement extends Entity {
 		// Constructor for a basic Entity:
 		super(textureRegion, position, 0f, scaleX, scaleY);
 		state = State.NOT_PRESSED;
-		// Sets the bounds, you can use the alternative createBounds method later.
-		createBounds();
-		actionable = false;
+		multiFrame = false;
+		visible = true;
 	}
 
 	/**
@@ -77,8 +84,7 @@ public class GuiElement extends Entity {
 		// Calls the super constructor for a multi-frame entity with no animation.
 		this(textureRegion, position, FRAME_ROWS, FRAME_COLS, 1f, 1f);
 		state = State.NOT_PRESSED;
-		createBounds();
-		actionable = true;
+		multiFrame = true;
 	}
 
 	/**
@@ -95,10 +101,20 @@ public class GuiElement extends Entity {
 	public GuiElement(TextureRegion textureRegion, Vector2 position, int FRAME_ROWS, int FRAME_COLS, float scaleX,
 	      float scaleY) {
 		// Calls the super constructor for a multi-frame entity with no animation.
-		super(textureRegion, position, 0, scaleX, scaleY, FRAME_ROWS, FRAME_COLS);
+		super(textureRegion, FRAME_ROWS, FRAME_COLS, position, 0, scaleX, scaleY);
 		state = State.NOT_PRESSED;
-		createBounds();
-		actionable = true;
+		multiFrame = true;
+		visible = true;
+	}
+
+	public void draw(SpriteBatch batch) {
+		if (visible) {
+			super.draw(batch);
+		}
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 
 	/**
@@ -107,8 +123,16 @@ public class GuiElement extends Entity {
 	 * @return true if the {@code Vector2} passed is inside the item bounds.
 	 */
 	public boolean isTouchingElement(Vector2 positionTouched) {
-		Rectangle rect = new Rectangle(positionTouched.x, positionTouched.y, 1, 1);
-		return this.getBounds().overlaps(rect);
+		if (visible) {
+			if (touchRecgantle == null) {
+				touchRecgantle = new Rectangle(positionTouched.x, positionTouched.y, 1, 1);
+			} else {
+				touchRecgantle.set(positionTouched.x, positionTouched.y, 1, 1);
+			}
+			return this.getBounds().overlaps(touchRecgantle);
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -119,7 +143,7 @@ public class GuiElement extends Entity {
 	 */
 	public void setState(State state) {
 		this.state = state;
-		if (actionable) {
+		if (multiFrame) {
 			if (this.state == State.NOT_PRESSED) {
 				currentFrame = frames[0];
 			} else if (this.state == State.PRESSED) {
@@ -132,7 +156,7 @@ public class GuiElement extends Entity {
 	 * Switch the state, from pressed to not_pressed and viceversa.
 	 */
 	public void switchState() {
-		if (actionable) {
+		if (multiFrame) {
 			if (this.state == State.PRESSED) {
 				state = State.NOT_PRESSED;
 				currentFrame = frames[0];
@@ -151,7 +175,7 @@ public class GuiElement extends Entity {
 	public void setTouchAngle(Vector2 posTouched) {
 		float distX = posTouched.x - getOriginCoordinates().x;
 		float distY = posTouched.y - getOriginCoordinates().y;
-		this.touchAngle = MathUtils.atan2(distY, distX) * MathUtils.radDeg;
+		touchAngle = MathUtils.atan2(distY, distX) * MathUtils.radDeg;
 	}
 
 	/**
@@ -193,12 +217,17 @@ public class GuiElement extends Entity {
 
 	}
 
+	public boolean isPressed() {
+		return state == State.PRESSED;
+	}
+
 	public State getState() {
 		return state;
 	}
 
 	/**
 	 * Sets the pointer (finger) which touched the element
+	 * 
 	 * @param pointer
 	 */
 	public void setPointer(int pointer) {

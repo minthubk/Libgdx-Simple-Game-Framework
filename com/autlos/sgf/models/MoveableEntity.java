@@ -1,5 +1,6 @@
-package com.autlos.sgf;
+package com.autlos.sgf.models;
 
+import com.autlos.sgf.GameAbstract;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
@@ -24,7 +25,7 @@ public abstract class MoveableEntity extends Entity {
 	protected float ROTATION_SPEED;
 
 	protected float SPEED;
-	protected float velocity;
+	protected Vector2 velocity;
 	protected boolean moving = false;
 
 	/**
@@ -52,6 +53,35 @@ public abstract class MoveableEntity extends Entity {
 	public MoveableEntity(TextureRegion textureRegion, Vector2 position, float SPEED, float scaleX, float scaleY,
 	      float rotation) {
 		super(textureRegion, position, rotation, scaleX, scaleY);
+		this.SPEED = SPEED;
+	}
+	
+	/**
+	 * Creates a MoveableEntity with frames but not animated. Scale will be 1f
+	 * @param textureRegion
+	 * @param FRAME_ROWS
+	 * @param FRAME_COLS
+	 * @param position
+	 * @param SPEED
+	 * @param rotation
+	 */
+	public MoveableEntity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, Vector2 position, float SPEED, float rotation) {
+		this(textureRegion, FRAME_ROWS, FRAME_COLS, position, SPEED, FRAME_COLS, 1f, 1f);
+	}
+	
+	/**
+	 * Creates a MoveableEntity with frames but not animated.
+	 * @param textureRegion
+	 * @param FRAME_ROWS
+	 * @param FRAME_COLS
+	 * @param position
+	 * @param SPEED
+	 * @param scaleX
+	 * @param scaleY
+	 * @param rotation
+	 */
+	public MoveableEntity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, Vector2 position, float SPEED, float scaleX, float scaleY, float rotation) {
+		super(textureRegion, FRAME_ROWS, FRAME_COLS, position, rotation, scaleX, scaleY);
 		this.SPEED = SPEED;
 	}
 
@@ -91,7 +121,7 @@ public abstract class MoveableEntity extends Entity {
 	 */
 	public MoveableEntity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, float frameDuration,
 	      int playMode, Vector2 position, float SPEED, float scaleX, float scaleY, float rotation) {
-		super(textureRegion, position, rotation, scaleX, scaleY, FRAME_ROWS, FRAME_COLS, frameDuration, playMode);
+		super(textureRegion, FRAME_ROWS, FRAME_COLS, position, rotation, scaleX, scaleY, frameDuration, playMode);
 		this.SPEED = SPEED;
 
 	}
@@ -101,15 +131,15 @@ public abstract class MoveableEntity extends Entity {
 	 */
 	protected void checkReversePositions() {
 		if (position.x + width < 0) {
-			position.x = AbstractGame.screenWidth - origin.x;
-		} else if (position.x > AbstractGame.screenWidth) {
+			position.x = GameAbstract.screenWidth - origin.x;
+		} else if (position.x > GameAbstract.screenWidth) {
 			position.x = -origin.x;
 		}
 
-		if (position.y + height / 2 > AbstractGame.screenHeight) {
+		if (position.y + height / 2 > GameAbstract.screenHeight) {
 			position.y = -origin.y;
 		} else if (position.y + height / 2 < 0) {
-			position.y = AbstractGame.screenHeight - origin.y;
+			position.y = GameAbstract.screenHeight - origin.y;
 		}
 	}
 
@@ -119,7 +149,7 @@ public abstract class MoveableEntity extends Entity {
 	 */
 	public void checkReversePositions(float minX, float minY, float maxX, float maxY) {
 		if (position.x + origin.x <= minX) {
-			position.x = AbstractGame.screenWidth - origin.x;
+			position.x = GameAbstract.screenWidth - origin.x;
 		} else if (position.x + origin.x > maxX) {
 			position.x = -origin.x;
 		}
