@@ -1,6 +1,8 @@
 package com.autlos.sgf;
 
 import com.autlos.sgf.models.Entity;
+import com.autlos.sgf.screens.ScreenController.Action;
+import com.autlos.sgf.ui.ITableItem;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -11,7 +13,8 @@ import com.badlogic.gdx.math.Vector2;
  * @author Autlos
  * 
  */
-public class GuiElement extends Entity {
+public class GuiElement extends Entity implements ITableItem{
+		
 	/**
 	 * enum to with the states NOT_PRESSED and PRESSED
 	 * 
@@ -34,12 +37,12 @@ public class GuiElement extends Entity {
 
 	protected State state;
 	protected TouchDirection touchDirection;
-	protected boolean multiFrame;
 	protected float touchAngle;
 	protected Rectangle touchRecgantle;
 
 	// The finger which touched the element
 	protected int pointer;
+	Action action;
 
 	// If the element is visible or not:
 	protected boolean visible;
@@ -67,7 +70,6 @@ public class GuiElement extends Entity {
 		// Constructor for a basic Entity:
 		super(textureRegion, position, 0f, scaleX, scaleY);
 		state = State.NOT_PRESSED;
-		multiFrame = false;
 		visible = true;
 	}
 
@@ -83,8 +85,6 @@ public class GuiElement extends Entity {
 	public GuiElement(TextureRegion textureRegion, Vector2 position, int FRAME_ROWS, int FRAME_COLS) {
 		// Calls the super constructor for a multi-frame entity with no animation.
 		this(textureRegion, position, FRAME_ROWS, FRAME_COLS, 1f, 1f);
-		state = State.NOT_PRESSED;
-		multiFrame = true;
 	}
 
 	/**
@@ -103,7 +103,6 @@ public class GuiElement extends Entity {
 		// Calls the super constructor for a multi-frame entity with no animation.
 		super(textureRegion, FRAME_ROWS, FRAME_COLS, position, 0, scaleX, scaleY);
 		state = State.NOT_PRESSED;
-		multiFrame = true;
 		visible = true;
 	}
 
@@ -122,12 +121,12 @@ public class GuiElement extends Entity {
 	 * @param positionTouched
 	 * @return true if the {@code Vector2} passed is inside the item bounds.
 	 */
-	public boolean isTouchingElement(Vector2 positionTouched) {
+	public boolean isTouchingElement(float x, float y) {
 		if (visible) {
 			if (touchRecgantle == null) {
-				touchRecgantle = new Rectangle(positionTouched.x, positionTouched.y, 1, 1);
+				touchRecgantle = new Rectangle(x, y, 1, 1);
 			} else {
-				touchRecgantle.set(positionTouched.x, positionTouched.y, 1, 1);
+				touchRecgantle.set(x, y, 1, 1);
 			}
 			return this.getBounds().overlaps(touchRecgantle);
 		} else {
@@ -143,7 +142,7 @@ public class GuiElement extends Entity {
 	 */
 	public void setState(State state) {
 		this.state = state;
-		if (multiFrame) {
+		if(frames != null){
 			if (this.state == State.NOT_PRESSED) {
 				currentFrame = frames[0];
 			} else if (this.state == State.PRESSED) {
@@ -156,7 +155,7 @@ public class GuiElement extends Entity {
 	 * Switch the state, from pressed to not_pressed and viceversa.
 	 */
 	public void switchState() {
-		if (multiFrame) {
+		if(frames != null){
 			if (this.state == State.PRESSED) {
 				state = State.NOT_PRESSED;
 				currentFrame = frames[0];
@@ -172,9 +171,9 @@ public class GuiElement extends Entity {
 	 * 
 	 * @param posTouched
 	 */
-	public void setTouchAngle(Vector2 posTouched) {
-		float distX = posTouched.x - getOriginCoordinates().x;
-		float distY = posTouched.y - getOriginCoordinates().y;
+	public void setTouchAngle(float touchedX, float touchedY) {
+		float distX = touchedX - getOriginCoordinates().x;
+		float distY = touchedY - getOriginCoordinates().y;
 		touchAngle = MathUtils.atan2(distY, distX) * MathUtils.radDeg;
 	}
 
@@ -216,6 +215,7 @@ public class GuiElement extends Entity {
 		}
 
 	}
+	
 
 	public boolean isPressed() {
 		return state == State.PRESSED;
@@ -247,6 +247,23 @@ public class GuiElement extends Entity {
 
 	public TouchDirection getTouchDirection() {
 		return touchDirection;
+	}
+
+	public void touchUp() {
+		if(action != null){
+			action.touchUp();
+		}
+	}
+
+	public void touchDown() {
+		if(action != null){
+			action.touchDown();
+		}
+	}
+
+	public void setAction(Action action) {
+		this.action = action;
+		
 	}
 
 }

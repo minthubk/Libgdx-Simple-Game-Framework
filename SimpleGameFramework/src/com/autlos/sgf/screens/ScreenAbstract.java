@@ -1,5 +1,6 @@
-package com.autlos.sgf;
+package com.autlos.sgf.screens;
 
+import com.autlos.sgf.GameAbstract;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL10;

@@ -53,6 +53,7 @@ public abstract class MoveableEntity extends Entity {
 	public MoveableEntity(TextureRegion textureRegion, Vector2 position, float SPEED, float scaleX, float scaleY,
 	      float rotation) {
 		super(textureRegion, position, rotation, scaleX, scaleY);
+		velocity = new Vector2();
 		this.SPEED = SPEED;
 	}
 	
@@ -82,6 +83,7 @@ public abstract class MoveableEntity extends Entity {
 	 */
 	public MoveableEntity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, Vector2 position, float SPEED, float scaleX, float scaleY, float rotation) {
 		super(textureRegion, FRAME_ROWS, FRAME_COLS, position, rotation, scaleX, scaleY);
+		velocity = new Vector2();
 		this.SPEED = SPEED;
 	}
 
@@ -100,7 +102,6 @@ public abstract class MoveableEntity extends Entity {
 	 */
 	public MoveableEntity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, float frameDuration,
 	      int playMode, Vector2 position, float SPEED, float rotation) {
-
 		this(textureRegion, FRAME_ROWS, FRAME_COLS, frameDuration, playMode, position, SPEED, 1f, 1f, rotation);
 	}
 
@@ -122,6 +123,7 @@ public abstract class MoveableEntity extends Entity {
 	public MoveableEntity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, float frameDuration,
 	      int playMode, Vector2 position, float SPEED, float scaleX, float scaleY, float rotation) {
 		super(textureRegion, FRAME_ROWS, FRAME_COLS, position, rotation, scaleX, scaleY, frameDuration, playMode);
+		velocity = new Vector2();
 		this.SPEED = SPEED;
 
 	}
@@ -207,6 +209,14 @@ public abstract class MoveableEntity extends Entity {
 	public void update() {
 		bounds.x = position.x + minBoundsX;
 		bounds.y = position.y + minBoundsY;
+	}
+	
+	public void setSpeed(float SPEED){
+		this.SPEED = SPEED;
+	}
+	
+	public float getSpeed(){
+		return SPEED;
 	}
 
 	/**

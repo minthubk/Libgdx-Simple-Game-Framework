@@ -63,10 +63,12 @@ public abstract class Entity {
 	 * @param scaleY
 	 */
 	public Entity(TextureRegion textureRegion, Vector2 position, float rotation, float scaleX, float scaleY) {
-		this.position = position;
+		setPosition(position);
 		this.rotation = rotation;
 		currentFrame = textureRegion;
 		setScale(scaleX, scaleY);
+		setDimensions();
+		createBounds(minBoundsX, minBoundsY); 
 	}
 
 	/**
@@ -96,11 +98,13 @@ public abstract class Entity {
 	public Entity(TextureRegion textureRegion, int FRAME_ROWS, int FRAME_COLS, Vector2 position, float rotation,
 	      float scaleX, float scaleY) {
 		createFrames(textureRegion, FRAME_ROWS, FRAME_COLS);
-		this.position = position;
+		setPosition(position);
 		this.rotation = rotation;
 
 		currentFrame = frames[0];
 		setScale(scaleX, scaleY);
+		setDimensions();
+		createBounds(minBoundsX, minBoundsY);
 		stateTime = 0f;
 	}
 
@@ -147,12 +151,13 @@ public abstract class Entity {
 		createFrames(textureRegion, FRAME_ROWS, FRAME_COLS);
 		this.animation = new Animation(frameDuration, frames);
 		animation.setPlayMode(playMode);
-
-		this.position = position;
+		setPosition(position);
 		this.rotation = rotation;
 
 		currentFrame = animation.getKeyFrame(0f);
 		setScale(scaleX, scaleY);
+		setDimensions();
+		createBounds(minBoundsX, minBoundsY);
 	}
 
 	/**
@@ -185,8 +190,6 @@ public abstract class Entity {
 	public void setScale(float scaleX, float scaleY) {
 		this.scaleX = scaleX;
 		this.scaleY = scaleY;
-		setDimensions();
-		createBounds(minBoundsX, minBoundsY);
 	}
 
 	/**
@@ -257,6 +260,10 @@ public abstract class Entity {
 	public void draw(SpriteBatch batch) {
 		batch.draw(currentFrame, position.x, position.y, origin.x, origin.y, width, height, 1.0f, 1.0f, rotation);
 	}
+	
+	public void setAnimation(Animation animation){
+			this.animation = animation;		
+	}
 
 	/**
 	 * Return true if the entity is overlaping one of the elements of the Array.
@@ -304,10 +311,10 @@ public abstract class Entity {
 	 *           the {@code Vector2} to be set
 	 */
 	public void setPosition(Vector2 position) {
-		if (this.position == null) {
-			this.position = new Vector2(position);
-		} else {
-			this.position.set(position);
+		if(position == null){
+			setPosition(0f, 0f);
+		}else{
+			setPosition(position.x, position.y);
 		}
 	}
 

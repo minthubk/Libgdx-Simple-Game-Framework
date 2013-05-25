@@ -1,21 +1,29 @@
 package com.autlos.sgf;
 
+import com.autlos.sgf.ui.ITableItem;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 /**
  * @author Autlos
  * 
  */
-public class BasicLabel {
+public class BasicLabel implements ITableItem {
 	private BitmapFont bitmapFont;
+	
+	// Text for the label
 	private String text;
-	private String sequence;
-	protected Vector2 position;
-	private TextBounds textBounds;
+	// Value for the label
 	private long value;
+	// text + value
+	private String sequence;
+	
+	protected Vector2 position;
+	protected Vector2 realPosition;
+	private TextBounds textBounds;
 
 	private boolean visible;
 
@@ -41,9 +49,7 @@ public class BasicLabel {
 		this.sequence = text;
 		this.text = sequence;
 		textBounds = new TextBounds(bitmapFont.getBounds(text));
-		if (position != null) {
-			this.position = new Vector2(position);
-		}
+		setPosition(position);
 		visible = true;
 	}
 
@@ -55,7 +61,7 @@ public class BasicLabel {
 	 * @param value
 	 */
 	public BasicLabel(BitmapFont bitMapFont, String text, long value) {
-		this(bitMapFont, text, value, new Vector2());
+		this(bitMapFont, text, value, null);
 	}
 
 	/**
@@ -66,41 +72,37 @@ public class BasicLabel {
 	 * @param value
 	 * @param position
 	 */
-	public BasicLabel(BitmapFont bitMapFont, String text, long value, Vector2 position) {
+	public BasicLabel(BitmapFont bitMapFont, String text, long value,
+			Vector2 position) {
 		this.bitmapFont = bitMapFont;
-		this.position = new Vector2(position);
 		this.sequence = text;
 		// Text to show will be the sequence plus the value.
 		this.text = this.sequence + value;
 		textBounds = new TextBounds(bitmapFont.getBounds(text + value));
+		setPosition(position);
 		visible = true;
 	}
 
-	public void createMultiRow(int ROWS) {
+	/**
+	 * Adjust the bounds when multiple row labels are created. This is not 100% precise, but it does the job.
+	 * @param ROWS
+	 */
+	public void adjustBoundsMultiRow(int ROWS) {
 		textBounds.width = textBounds.width / ROWS;
 		textBounds.height = textBounds.height * ROWS;
 	}
 
-	public void setPosition(Vector2 position) {
-		if (position == null) {
-			this.position = new Vector2(position);
-		} else {
-			this.position.set(position);
-		}
-	}
-
-	public void setPosition(float x, float y) {
-		if (position != null) {
-			position.set(x, y);
-		} else {
-			position = new Vector2(x, y);
-		}
-	}
-
+	/**
+	 * Switchs the visibility of the label. 
+	 */
 	public void switchVisibility() {
 		visible = !visible;
 	}
 
+	/**
+	 * If false, the element won't be draw.
+	 * @param visible
+	 */
 	public void setVisibility(boolean visible) {
 		this.visible = visible;
 	}
@@ -116,9 +118,9 @@ public class BasicLabel {
 		text = this.sequence + value;
 	}
 
-	public void setText(String text) {
-		this.sequence = text;
-		this.text = value == 0 ? text : sequence + value;
+	public void setText(String sequence) {
+		this.sequence = sequence;
+		this.text = value == 0 ? sequence : this.sequence + value;
 		if (textBounds == null) {
 			textBounds = new TextBounds(bitmapFont.getBounds(text));
 		} else {
@@ -126,8 +128,32 @@ public class BasicLabel {
 		}
 	}
 
+	public void setPosition(Vector2 position) {
+		if (position != null) {
+			setPosition(position.x, position.y);
+		}else{
+			setPosition(0f, 0f);
+		}
+	}
+
+	public void setPosition(float x, float y) {
+		if (position != null) {
+			position.set(x, y);
+		} else {
+			position = new Vector2(x, y);
+		}
+		
+		if (realPosition == null) {
+			realPosition = new Vector2(position.x, position.y
+					- textBounds.height);
+		} else {
+			realPosition.set(position.x, position.y
+					- textBounds.height);
+		}
+	}
+
 	public Vector2 getPosition() {
-		return new Vector2(position.x, position.y - textBounds.height);
+		return realPosition;
 	}
 
 	public float getWidth() {
@@ -147,6 +173,11 @@ public class BasicLabel {
 		if (visible) {
 			bitmapFont.drawMultiLine(batch, text, position.x, position.y);
 		}
+	}
+
+	@Override
+	public void drawShape(ShapeRenderer sr) {
+		sr.rect(position.x, getPosition().y, getWidth(), getHeight());
 	}
 
 }

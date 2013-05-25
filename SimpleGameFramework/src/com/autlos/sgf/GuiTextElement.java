@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Vector2;
  * @author Autlos
  * 
  */
-public class GuiTextElement extends GuiElement {
+public class GuiTextElement extends GuiElement{
 	/**
 	 * enum with states CENTER, TOP, LEFT, RIGHT and BOTTOM
 	 * 
@@ -23,11 +23,12 @@ public class GuiTextElement extends GuiElement {
 	private TEXT_ALIGNMENT align;
 	// The BasicLabel object for this GuiTextElement
 	private BasicLabel label;
+	
 
 	/********** CONSTRUCTORS **********/
 
 	/**
-	 * Creates a GuiTextElement in the specified position.
+	 * Creates a GuiTextElement at the specified position.
 	 * 
 	 * @param textureRegion
 	 * @param position
@@ -65,12 +66,14 @@ public class GuiTextElement extends GuiElement {
 	}
 
 	/**
-	 * Creates a GuiTextElement in the specified position.
+	 * Creates a GuiTextElement at the specified position.
 	 * 
 	 * @param textureRegion
 	 * @param position
 	 * @param font
 	 * @param text
+	 * @param scaleX
+	 * @param scaleY
 	 */
 	public GuiTextElement(TextureRegion textureRegion, Vector2 position, BitmapFont font, String text, float scaleX,
 	      float scaleY) {
@@ -192,14 +195,14 @@ public class GuiTextElement extends GuiElement {
 	 * Sets the position and aligns the text to center.
 	 */
 	public void setPosition(Vector2 position) {
-		super.setPosition(position);
-		alignText(TEXT_ALIGNMENT.CENTER);
+		setPosition(position.x, position.y);
 	}
 
 	public void setPosition(float x, float y){
 		super.setPosition(x, y);
 		alignText(TEXT_ALIGNMENT.CENTER);
 	}
+	
 	public BasicLabel getLabel() {
 		return label;
 	}
